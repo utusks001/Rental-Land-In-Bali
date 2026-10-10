@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="facebook-domain-verification" content="j6bbln1ps0l0dfsrro6hao00cxuzkh" />
+
+<title>Prime Land Leasehold North Bali | Luxury Investment Opportunity</title>
+
+<script>
+!function(f,b,e,v,n,t,s){
+if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)
+}(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+
+fbq('init', '1265687265197976');
+fbq('track', 'PageView');
+</script>
+
+<script>
+let currentLang = "en";
+
+/* ===== GOOGLE DRIVE MEDIA HELPERS ===== */
+function driveId(url){
+  const m = String(url||"").match(/(?:\/d\/|[?&]id=)([\w-]{20,})/);
+  return m ? m[1] : null;
+}
+const DRIVE_IMG_SOURCES = [
+  id => `https://drive.google.com/thumbnail?id=${id}&sz=w1600`,
+  id => `https://lh3.googleusercontent.com/d/${id}=w1600`,
+  id => `https://drive.google.com/uc?export=view&id=${id}`
+];
+function driveImgFallback(img){
+  const id = driveId(img.currentSrc || img.src);
+  if(!id) return;
+  const n = (parseInt(img.dataset.try||"0",10)) + 1;
+  if(n < DRIVE_IMG_SOURCES.length){
+    img.dataset.try = n;
+    img.src = DRIVE_IMG_SOURCES[n](id);
+  }
+}
+document.addEventListener("error", function(e){
+  const el = e.target;
+  if(el && el.tagName === "IMG" && /drive\.google|googleusercontent/.test(el.src)){
+    driveImgFallback(el);
+  }
+}, true);
+
+function driveVideoFallback(video){
+  const id = video.dataset.driveId;
+  if(!id || video.dataset.fallback) return;
+  video.dataset.fallback = "1";
+  const iframe = document.createElement("iframe");
+  iframe.src = `https://drive.google.com/file/d/${id}/preview`;
+  iframe.allow = "autoplay; fullscreen";
+  iframe.allowFullscreen = true;
+  iframe.style.cssText = video.classList.contains("gif-video")
+    ? "width:100%;aspect-ratio:16/9;border:0;display:block;border-radius:12px;"
+    : "width:100%;height:100%;border:0;display:block;";
+  video.replaceWith(iframe);
+}
+
+function generateEventID(){
+  return 'evt_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
+}
+
+/* LANGUAGE SWITCHER (EN, JA, FR) */
+function setLang(lang){
+  currentLang = lang;
+
+  document.querySelectorAll("[data-en]").forEach(el=>{
+    if(el.tagName !== "IMG"){
+      if(lang === "ja" && el.dataset.ja) el.innerHTML = el.dataset.ja;
+      else if(lang === "fr" && el.dataset.fr) el.innerHTML = el.dataset.fr;
+      else el.innerHTML = el.dataset.en;
+    }
+  });
+
+  document.querySelectorAll("img[data-en]").forEach(img=>{
+    img.dataset.try = "0";
+    if(lang === "ja" && img.dataset.ja) img.src = img.dataset.ja;
+    else if(lang === "fr" && img.dataset.fr) img.src = img.dataset.fr;
+    else img.src = img.dataset.en;
+  });
+
+  updateViewer();
+}
+
+function trackLeadEvent(sourceName){
+    let eventID = generateEventID();
+    
+    fbq('track', 'Lead', {
+        content_name: 'Bali Land Leasehold',
+        content_category: 'Real Estate',
+        source: sourceName
+    }, {eventID: eventID});
+
+    fbq('trackCustom', 'WhatsApp_Click', {
+        source: sourceName
+    }, {eventID: eventID});
+}
+
+function waInfo(){
+  trackLeadEvent('info_button');
+  let text = "Hello, I am interested in the long-term land leasehold opportunity in North Bali.";
+  if(currentLang === "ja") text = "こんにちは。北バリの me 長期土地定期借地権（リースホールド）投資について詳細を教えてください。";
+  if(currentLang === "fr") text = "Bonjour, je souhaite memperoleh des informations sur l'opportunité de bail à long terme au nord de Bali.";
+
+  window.open('https://wa.me/6281315373768?text='+encodeURIComponent(text),'_blank');
+}
+
+function waSurvey(){
+  trackLeadEvent('survey_button');
+  let text = "Hello, I would like to schedule a site inspection for the land lease in North Bali.";
+  if(currentLang === "ja") text = "こんにちは。北バリの借地物件の現地視察（現地案内）を予約したいです。";
+  if(currentLang === "fr") text = "Bonjour, je souhaite planifier une visite du site pour la location de terrain au nord de Bali.";
+
+  window.open('https://wa.me/6281315373768?text='+encodeURIComponent(text),'_blank');
+}
+
+function updateViewer(){
+  let n = Math.floor(Math.random()*15)+8;
+  let viewerEl = document.getElementById("viewer");
+  if(viewerEl){
+    if(currentLang === "ja") viewerEl.innerHTML = "👀 "+n+" 名の投資家がこの物件を閲覧中";
+    else if(currentLang === "fr") viewerEl.innerHTML = "👀 "+n+" investisseurs consultent cette opportunité";
+    else viewerEl.innerHTML = "👀 "+n+" international investors are viewing this deal";
+  }
+}
+</script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#08110a;color:#fff;line-height:1.6}
+
+#langToggle{position:fixed;top:20px;right:20px;z-index:1000;}
+#langToggle button{
+background:#ffffff;color:#111;border:1px solid #ccc;padding:8px 12px;
+margin-left:4px;border-radius:8px;cursor:pointer;font-weight:700;transition:all 0.2s ease;
+}
+#langToggle button:hover{background:#ffd700;color:#000;}
+
+.hero{text-align:center;padding:70px 20px;background:linear-gradient(135deg,#061008,#102015,#061008)}
+.badge{background:#e60023;color:#fff;padding:10px 26px;border-radius:999px;font-size:13px;font-weight:700;margin-bottom:18px;display:inline-block;letter-spacing:1px;}
+h1{font-size:38px;color:#ffd700;margin-bottom:12px;line-height:1.2}
+.sub,.desc{font-size:15px;margin-bottom:14px;color:#e0e0e0}
+
+.btn{
+background:#25D366;color:#fff !important;padding:16px 32px;
+border-radius:12px;font-weight:700;display:inline-block;text-decoration:none;cursor:pointer;
+box-shadow:0 4px 15px rgba(37,211,102,0.3);transition:transform 0.2s ease;
+}
+.btn:hover{transform:translateY(-2px);}
+
+section{padding:45px 20px;max-width:900px;margin:auto;background:#f8f9fa;color:#111;border-radius:12px;margin-bottom:20px}
+h2{text-align:center;margin-bottom:16px;font-size:26px;color:#0f1f13}
+img{width:100%;border-radius:12px}
+.gif-video{width:100%;display:block;border-radius:12px;background:#000}
+
+.box{background:#fff;border-radius:16px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+.item{background:#f1f3f5;padding:14px;border-radius:10px;margin-bottom:10px;font-size:15px}
+.price{background:#fff3cd;border:1px solid #ffe08a;font-weight:700;color:#856404}
+
+.cta{
+background:linear-gradient(135deg,#0f1f13,#12391f);
+padding:50px 20px;text-align:center;border-radius:20px;color:#fff;margin:40px auto;
+}
+
+#floatingWA{
+position:fixed;bottom:20px;right:20px;background:#128C3A;
+color:#fff;padding:14px 22px;border-radius:999px;cursor:pointer;z-index:999;font-weight:700;
+box-shadow:0 4px 20px rgba(0,0,0,0.3);
+}
+
+#viewer{
+position:fixed;top:20px;left:20px;background:#fff;
+color:#333;padding:10px 16px;border-radius:14px;z-index:999;font-size:13px;font-weight:600;
+box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+
+.video-wrapper1{
+    width:100%;
+    max-width:500px;
+    height:500px;
+    margin:20px auto;
+    overflow:hidden;
+    border-radius:20px;
+    position:relative;
+    background:#000;
+}
+
+.video-wrapper1 video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+.video-title1{
+    width:100%;
+    text-align:center;
+    font-size:18px;
+    font-weight:700;
+    margin-top:12px;
+    color:#000000;
+}
+
+.video-wrapper{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:12px;
+    flex-wrap:nowrap;
+    margin-top:10px;
+    margin-bottom:25px;
+}
+
+.video-box{
+    width:190px;
+    text-align:center;
+    flex:0 0 auto;
+}
+
+.video-container{
+    width:100%;
+    aspect-ratio:9/16;
+    overflow:hidden;
+    border-radius:18px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.25);
+    margin-bottom:8px;
+}
+
+.video-container iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
+
+.video-title{
+    font-size:15px;
+    font-weight:700;
+    line-height:1.3;
+    color:#000;
+}
+</style>
+</head>
+
+<body>
+
+<div id="langToggle">
+<button onclick="setLang('en')">EN</button>
+<button onclick="setLang('ja')">JA</button>
+<button onclick="setLang('fr')">FR</button>
+</div>
+
+<div id="viewer"></div>
+
+<div class="hero">
+<div class="badge" 
+     data-en="EXCLUSIVE LONG-TERM LEASEHOLD (25-30+ YEARS)" 
+     data-ja="長期定期借地権（25〜30年＋延長可能）" 
+     data-fr="BAIL À LONG TERME EXCLUSIF (25-30+ ANS)">
+     EXCLUSIVE LONG-TERM LEASEHOLD (25-30+ YEARS)
+</div>
+
+<h1 data-en="PRIME DEVELOPMENT LAND<br>NORTH BALI" 
+    data-ja="バリ島 there 北部 大型開発用地<br>長期長期借地権" 
+    data-fr="TERRAIN D'EXCEPTION<br>NORD DE BALI">
+    PRIME DEVELOPMENT LAND<br>NORTH BALI
+</h1>
+
+<p class="sub" 
+   data-en="• High ROI Potential • Fully Secure Lease Rights for Foreigners • Exceptional Capital Growth"
+   data-ja="• 高いROI（投資対効果） • 外国人投資家に安心の法例準拠リース • 圧倒的な資産価値上昇"
+   data-fr="• Fort Potentiel de ROI • Cadre Légal Sécurisé pour Étrangers • Forte Valorisation">
+   • High ROI Potential • Fully Secure Lease Rights for Foreigners • Exceptional Capital Growth
+</p>
+
+<p class="desc" 
+   data-en="✔ 6.5 Hectares Master Development Scale<br>✔ Long-Term Lease Deal (25–30 Years + Guaranteed Extension Rights)<br>✔ Minutes from the Landmark TURYAPADA TOWER"
+   data-ja="✔ 6.5ヘクタール（65,000㎡）の大型マスタープラン用地<br>✔ 長期リース（25〜30年契約＋優先延長権付）<br>✔ ランドマーク「トゥリヤパダタワー」至近"
+   data-fr="✔ Grand Domain de 6,5 Hectaires pour Développeurs<br>✔ Bail Longue Durée (25-30 Ans + Droit de Renouvellement Guarantee)<br>✔ Proche de la Tour Iconique TURYAPADA">
+   ✔ 6.5 Hectares Master Development Scale<br>✔ Long-Term Lease Deal (25–30 Years + Guaranteed Extension Rights)<br>✔ Minutes from the Landmark TURYAPADA TOWER
+</p>
+
+<a class="btn" onclick="waInfo()" 
+   data-en="🚀 REQUEST LEASEHOLD PROSPECTUS" 
+   data-ja="🚀 借地権・投資詳細資料を請求" 
+   data-fr="🚀 DEMANDER LE DOSSIER D'INVESTISSEMENT">
+   🚀 REQUEST LEASEHOLD PROSPECTUS
+</a>
+</div>
+
+<section>
+<h2 data-en="Visual Overview & Masterplan Scope" 
+    data-ja="敷地ビジュアル＆開発ポテンシャル" 
+    data-fr="Aperçu Visuel & Potentiel de Développement">
+    Visual Overview & Masterplan Scope
+</h2>
+<img referrerpolicy="no-referrer" decoding="async" 
+     src="https://drive.google.com/thumbnail?id=17AwgZo6XAiM_XMeMfAiDvAw2BKg1ozst&sz=w1600"
+     data-en="https://drive.google.com/thumbnail?id=17AwgZo6XAiM_XMeMfAiDvAw2BKg1ozst&sz=w1600"
+     data-ja="https://drive.google.com/thumbnail?id=1C0Ooxqdb4yZUeDzUWJduwyJ7pRh4fi3K&sz=w1600"
+     data-fr="https://drive.google.com/thumbnail?id=17AwgZo6XAiM_XMeMfAiDvAw2BKg1ozst&sz=w1600">
+</section>
+
+<section>
+<h2 data-en="Strategic Location & Access Overview" 
+    data-ja="立地とアクセスの概要" 
+    data-fr="Emplacement Stratégique & Accès">
+    Strategic Location & Access Overview
+</h2>
+
+<video class="gif-video" autoplay muted loop playsinline webkit-playsinline preload="auto" referrerpolicy="no-referrer" data-drive-id="1_Q78YTfA0raTz-XV7eGh-aTvMExpVc3N">
+    <source src="https://drive.usercontent.google.com/download?id=1_Q78YTfA0raTz-XV7eGh-aTvMExpVc3N&export=download&confirm=t" type="video/mp4">
+</video>
+
+<div style="text-align:center;margin-top:18px;">
+<a href="https://www.google.com/maps/place/8%C2%B013'11.8%22S+115%C2%B009'48.7%22E/@-8.2199444,115.1635278,691m/data=!3m2!1e3!4b1!4m4!3m3!8m2!3d-8.2199444!4d115.1635278!5m1!1e1?hl=en&entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D"
+   target="_blank"
+   class="btn"
+   data-en="📍 OPEN IN GOOGLE MAPS"
+   data-ja="📍 Google マップで位置を確認"
+   data-fr="📍 VOIR SUR GOOGLE MAPS">
+   📍 OPEN IN GOOGLE MAPS
+</a>
+</div>
+</section>
+
+<section>
+    <h2 data-en="🔥 <strong>Major Catalysts:</strong> TURYAPADA TOWER & ECO-TOURISM WATERFALLS"
+        data-ja="🔥 <strong>主要経済触媒:</strong> トゥリヤパダタワー ＆ 滝観光エリア"
+        data-fr="🔥 <strong>Moteurs de Croissance:</strong> TOUR TURYAPADA & CASCADE TROPICALE">
+        🔥 <strong>Major Catalysts:</strong> TURYAPADA TOWER & ECO-TOURISM WATERFALLS
+    </h2>
+
+<div class="video-wrapper1">
+    <video autoplay muted controls loop playsinline webkit-playsinline preload="metadata" referrerpolicy="no-referrer" data-drive-id="12K1l5QWdS-7ldkvnFPrazssv6Rv_eKEa">
+        <source src="https://drive.usercontent.google.com/download?id=12K1l5QWdS-7ldkvnFPrazssv6Rv_eKEa&export=download&confirm=t" type="video/mp4">
+    </video>
+</div>
+
+<div class="video-title1" data-en="Turyapada Tower Iconic Landmark" data-ja="トゥリヤパダタワー（新ランドマーク）" data-fr="Tour Iconique Turyapada">Turyapada Tower Iconic Landmark</div>
+<br>
+
+<div class="video-wrapper">
+    <div class="video-box">
+        <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/NkX5nbY_Rdk" allowfullscreen></iframe>
+        </div>
+        <div class="video-title" data-en="Tirta Buana Waterfall" data-ja="ティルタ・ブアナの滝" data-fr="Cascade Tirta Buana">Tirta Buana Waterfall</div>
+    </div>
+
+    <div class="video-box">
+        <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/EnP-XhNDFmY" allowfullscreen></iframe>
+        </div>
+        <div class="video-title" data-en="Fiji Lemukih Waterfall" data-ja="フィジー・レムキの滝" data-fr="Cascade Fiji Lemukih">Fiji Lemukih Waterfall</div>
+    </div>  
+</div>
+
+<div class="video-wrapper">
+    <div class="video-box">
+        <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/Chei5MTPtz0" allowfullscreen></iframe>
+        </div>
+        <div class="video-title" data-en="Sekumpul Waterfall" data-ja="セクンプル絶景の滝" data-fr="Cascade Sekumpul">Sekumpul Waterfall</div>
+    </div>
+
+    <div class="video-box">
+        <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/l7aDhoq3QpE" allowfullscreen></iframe>
+        </div>
+        <div class="video-title" data-en="Gitgit Waterfall" data-ja="ギギの滝" data-fr="Cascade Gitgit">Gitgit Waterfall</div>
+    </div>
+</div>
+
+<div class="box">
+    <div class="item" data-en="🏗 New Tourism & Telecommunication Megaproject in North Bali" data-ja="🏗 北バリ最大級の観光＆通信メガプロジェクト" data-fr="🏗 Mégaprojet touristique et télécom majeur au nord de Bali">🏗 New Tourism & Telecommunication Megaproject in North Bali</div>
+    <div class="item" data-en="🌄 Over 100-meter height offering 360° ocean & mountain views" data-ja="🌄 標高100m超の展望台から海と山を望む360度パノラマ" data-fr="🌄 Vue panoramique à 360° sur la mer et les montagnes à +100m">🌄 Over 100-meter height offering 360° ocean & mountain views</div>
+    <div class="item" data-en="🌉 Glass bridge & skywalk destination" data-ja="🌉 地域初のガラス橋＆スカイウォーク施設" data-fr="🌉 Premier pont en verre et skywalk spectaculaire">🌉 Glass bridge & skywalk destination</div>
+    <div class="item" data-en="🍽 Revolving 360° luxury restaurant & planetarium" data-ja="🍽 360度回転展望レストラン＆現代プラネタリウム" data-fr="🍽 Restaurant panoramique tournant & planétarium">🍽 Revolving 360° luxury restaurant & planetarium</div>
+    <div class="item" data-en="🚡 1.1 KM Scenic Cable Car System" data-ja="🚡 1.1kmの観光ロープウェイ（ゴンドラ）完備" data-fr="🚡 Téléphérique panoramique de 1,1 km">🚡 1.1 KM Scenic Cable Car System</div>
+    <div class="item" data-en="📈 Exponential driver for land values & high-net-worth tourism" data-ja="📈 土地資産価値と観光客流動を爆発的に高める要因" data-fr="📈 Accélérateur de valeur foncière et de tourisme haut de gamme">📈 Exponential driver for land values & high-net-worth tourism</div>
+    <div class="item" data-en="💦 Tirta Buana Waterfall (Only 5 Mins)" data-ja="💦 ティルタ・ブアナの滝（車でわずか5分）" data-fr="💦 Cascade Tirta Buana (À seulement 5 min)">💦 Tirta Buana Waterfall (Only 5 Mins)</div>
+    <div class="item" data-en="🌊 Fiji Lemukih Waterfall (15 Mins)" data-ja="🌊 フィジー・レムキの滝（15分）" data-fr="🌊 Cascade Fiji Lemukih (15 min)">🌊 Fiji Lemukih Waterfall (15 Mins)</div>
+    <div class="item" data-en="🌿 Sekumpul Waterfall (25 Mins)" data-ja="🌿 セクンプルの滝（25分）" data-fr="🌿 Cascade Sekumpul (25 min)">🌿 Sekumpul Waterfall (25 Mins)</div>
+    <div class="item" data-en="🏞 Gitgit Waterfall (30 Mins)" data-ja="🏞 ギギの滝（30分）" data-fr="🏞 Cascade Gitgit (30 min)">🏞 Gitgit Waterfall (30 Mins)</div>
+</div>
+</section>
+
+<section>
+<h2 data-en="Why Institutional & Private Investors Are Moving In" 
+    data-ja="機関投資家・海外投資家が注目する理由" 
+    data-fr="Pourquoi les Investisseurs Choisissent ce Domaine">
+    Why Institutional & Private Investors Are Moving In
+</h2>
+<div class="box">
+<div class="item" data-en="✔ Direct proximity to Turyapada Tower landmark" data-ja="✔ トゥリヤパダタワーに隣接する超好立地" data-fr="✔ Proximité immédiate de la tour Turyapada">✔ Direct proximity to Turyapada Tower landmark</div>
+<div class="item" data-en="✔ Surrounded by world-class eco-tourism waterfalls" data-ja="✔ 世界的に有名な滝や自然アクティビティゾーンに囲まれた環境" data-fr="✔ Entouré de cascades prisées mondialement">✔ Surrounded by world-class eco-tourism waterfalls</div>
+<div class="item" data-en="✔ Rapidly expanding luxury tourism corridor" data-ja="✔ 高級リゾート・ヴィラ需要が急増する開発エリア" data-fr="✔ Corridor touristique en forte expansion">✔ Rapidly expanding luxury tourism corridor</div>
+<div class="item" data-en="✔ Clean legal structure (Fully compliant lease agreements for foreigners)" data-ja="✔ 外国人投資に適した明確な長期定期借地権契約（PMA/個人対応）" data-fr="✔ Structure juridique 100% sécurisée pour bail étrangers">✔ Clean legal structure (Fully compliant lease agreements for foreigners)</div>
+<div class="item" data-en="✔ Panoramic ocean and mountain ridge topography" data-ja="✔ 海と山を一望できるプレミアムな傾斜景観" data-fr="✔ Topographie d'exception (Vue mer & montagne)">✔ Panoramic ocean and mountain ridge topography</div>
+<div class="item" data-en="✔ High projected yield & yield on exit" data-ja="✔ 高い年間利回りと将来の転貸・売却利益ポテンシャル" data-fr="✔ Excellent potentiel de rendement et valorisation">✔ High projected yield & yield on exit</div>
+</div>
+</section>
+
+<section>
+<h2 data-en="Master Development Concepts" 
+    data-ja="推奨開発コンセプト＆収益化" 
+    data-fr="Concepts de Développement & Monétisation">
+    Master Development Concepts
+</h2>
+<div class="box">
+<div class="item" data-en="🏡 Luxury Eco-Resort & Private Pool Villas" data-ja="🏡 高級エコリゾート＆プライベートプールヴィラ" data-fr="🏡 Eco-Resort de Luxe & Villas de Prestige">🏡 Luxury Eco-Resort & Private Pool Villas</div>
+<div class="item" data-en="⛺ High-End Glamping & Wellness Retreat" data-ja="⛺ ハイエンド・グランピング＆ウェルネスリトリート" data-fr="⛺ Domaine Glamping Haut de Gamme & Sanctuary Bien-être">⛺ High-End Glamping & Wellness Retreat</div>
+<div class="item" data-en="☕ Panoramic Sunset Café & Dining Hub" data-ja="☕ サンセット・パノラマカフェ＆ダイニング" data-fr="☕ Café / Restaurant Panoramique d'Exception">☕ Panoramic Sunset Café & Dining Hub</div>
+<div class="item" data-en="⛳ Integrated Cultural & Nature Experience Park" data-ja="⛳ 複合型ネイチャー・カルチャーパーク" data-fr="⛳ Parc Touristique Intégré & Complexe de Loisirs">⛳ Integrated Cultural & Nature Experience Park</div>
+</div>
+</section>
+
+<section>
+<h2 data-en="Asset Specifications & Lease Terms" 
+    data-ja="物件詳細および借地条件" 
+    data-fr="Spécifications de l'Actif & Conditions de Bail">
+    Asset Specifications & Lease Terms
+</h2>
+
+<div style="text-align:center; margin-top:20px;">
+    <a href="https://earth.google.com/web/@-8.21679688,115.11452907,1062.10582097a,23915.04159486d,35y,0h,0t,0r/data=CgRCAggBMikKJwolCiExcVRNSWxOUjBoM3JoZU9JV3R1Q0J1TmhDNEhBbjdaT18gAToDCgEwQgIIAEoICOz8hckBEAE?hl=id&pli=1&authuser=1"
+       target="_blank">
+        <img referrerpolicy="no-referrer" loading="lazy" decoding="async"
+        src="https://drive.google.com/thumbnail?id=1SABnK6L5QR0C7O3h2yLdsjJGu9iOWScS&sz=w1600"
+        alt="Google Earth Location"
+        style="
+            width:100%;
+            max-width:950px;
+            border-radius:18px;
+            box-shadow:0 6px 20px rgba(0,0,0,0.25);
+            margin-bottom:18px;
+            cursor:pointer;
+        ">
+    </a>
+</div>
+
+<div class="box">
+<div class="item price" 
+     data-en="💰 Attractive Lease Rate: IDR 50 Million / Are / Year (1 Are = 100 m²)" 
+     data-ja="💰 賃貸条件: 1アール (100㎡) あたり年間 50,000,000 ルピア" 
+     data-fr="💰 Tarification du Bail: 50 Millions IDR / Are / An (1 Are = 100 m²)">
+     💰 Attractive Lease Rate: IDR 50 Million / Are / Year (1 Are = 100 m²)
+</div>
+
+<div class="item"
+     data-en="📐 Total Land Area: 6.51 Hectares (651.2 Are) — <strong>Bulk Master-Lease Discount Available</strong>."
+     data-ja="📐 全体面積: 6.51ヘクタール（651.2 アール） — <strong>一括リース時の特別割引交渉可</strong>。"
+     data-fr="📐 Superficie Totale: 6,51 Hectares (651,2 Are) — <strong>Remise pour Prise de Bail Globale</strong>.">
+     📐 Total Land Area: 6.51 Hectares (651.2 Are) — <strong>Bulk Master-Lease Discount Available</strong>.
+</div>
+
+<div class="item" 
+     data-en="📄 Tenure Structure: 25 to 30 Years Guaranteed Initial Lease + Legally Binding Renewal Options (Indonesian Hak Sewa / PMA Compliant)" 
+     data-ja="📄 借地権契約形態: 初期 25年〜30年 長期借地権 ＋ 優先延長権（インドネシア借地法完全準拠・外国人/外資企業名義可能）" 
+     data-fr="📄 Structure du Bail: 25 à 30 Ans de Bail Initial + Droit de Renouvellement Notarié (Conforme au Cadre Légal Réglementaire)">
+     📄 Tenure Structure: 25 to 30 Years Guaranteed Initial Lease + Legally Binding Renewal Options (Indonesian Hak Sewa / PMA Compliant)
+</div>
+
+<div class="item" 
+     data-en="📍 Location: Sukasada, Buleleng, North Bali Regency" 
+     data-ja="📍 所在地: インドネシア・バリ州ブレレン県スカサダ" 
+     data-fr="📍 Localisation: Sukasada, Buleleng, Régence du Nord de Bali">
+     📍 Location: Sukasada, Buleleng, North Bali Regency
+</div>
+</div>
+</section>
+
+<section class="cta">
+<div class="cta-title" 
+     data-en="⚠️ SECURE YOUR POSITION IN NORTH BALI'S BOOM" 
+     data-ja="⚠️ 北バリの急速な開発の波に乗る絶好の機会" 
+     data-fr="⚠️ POSITIONNEZ-VOUS SUR LE MARCHÉ EN PLEINE ESSOR">
+     ⚠️ SECURE YOUR POSITION IN NORTH BALI'S BOOM
+</div>
+
+<p style="margin-top:8px;margin-bottom:20px;"
+   data-en="Acquire early leasehold rights prior to major infrastructure completion." 
+   data-ja="インフラ完成による地価高騰の前に、長期定期借地権を確保してください。" 
+   data-fr="Saisissez vos droits de bail avant l'achèvement complet des infrastructures.">
+   Acquire early leasehold rights prior to major infrastructure completion.
+</p>
+
+<a class="btn" onclick="waSurvey()" 
+   data-en="🔥 SCHEDULE PRIVATE SITE INSPECTION" 
+   data-ja="🔥 現地視察・個別商談を予約" 
+   data-fr="🔥 PLANIFIER UNE VISITE DE SITE PRIVÉE">
+   🔥 SCHEDULE PRIVATE SITE INSPECTION
+</a>
+</section>
+
+<div id="floatingWA" onclick="waInfo()" 
+     data-en="💬 Direct Investor Inquiry" 
+     data-ja="💬 WhatsAppで投資相談" 
+     data-fr="💬 Contact Direct Investisseurs">
+     💬 Direct Investor Inquiry
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  setLang("en");
+  updateViewer();
+
+  const video = document.querySelector(".video-wrapper1 video");
+  if(video){
+      video.muted = true;
+      const src = video.querySelector("source");
+      if(src) src.addEventListener("error", () => driveVideoFallback(video));
+      video.addEventListener("error", () => driveVideoFallback(video));
+      video.play().catch(e => console.log("Autoplay blocked"));
+  }
+
+  document.querySelectorAll("video.gif-video").forEach(v => {
+      v.muted = true;
+      const src = v.querySelector("source");
+      if(src) src.addEventListener("error", () => driveVideoFallback(v));
+      v.addEventListener("error", () => driveVideoFallback(v));
+      v.play().catch(e => console.log("Autoplay blocked"));
+  });
+});
+
+setInterval(updateViewer,4000);
+</script>
+
+</body>
+</html>
