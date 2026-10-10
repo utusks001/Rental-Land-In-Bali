@@ -25,7 +25,7 @@ fbq('track', 'PageView');
 <script>
 let currentLang = "en";
 
-/* ===== GOOGLE DRIVE MEDIA HELPERS (aman untuk GitHub Pages & Vercel) ===== */
+/* ===== GOOGLE DRIVE MEDIA HELPERS ===== */
 function driveId(url){
   const m = String(url||"").match(/(?:\/d\/|[?&]id=)([\w-]{20,})/);
   return m ? m[1] : null;
@@ -51,26 +51,12 @@ document.addEventListener("error", function(e){
   }
 }, true);
 
-function driveVideoFallback(video){
-  const id = video.dataset.driveId;
-  if(!id || video.dataset.fallback) return;
-  video.dataset.fallback = "1";
-  const iframe = document.createElement("iframe");
-  iframe.src = `https://drive.google.com/file/d/${id}/preview`;
-  iframe.allow = "autoplay; fullscreen";
-  iframe.allowFullscreen = true;
-  iframe.style.cssText = video.classList.contains("gif-video")
-    ? "width:100%;aspect-ratio:16/9;border:0;display:block;border-radius:12px;"
-    : "width:100%;height:100%;border:0;display:block;";
-  video.replaceWith(iframe);
-}
-
 /* EVENT ID GENERATOR */
 function generateEventID(){
 return 'evt_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
 }
 
-/* LANGUAGE SWITCHER (DIPERBARUI AGAR VIDEO IKUT BERGANTI) */
+/* LANGUAGE SWITCHER (MENGGANTI IFRAME VIDEO UTAMA SESUAI BAHASA) */
 function setLang(lang){
 currentLang = lang;
 
@@ -87,18 +73,15 @@ img.dataset.try = "0";
 img.src = (lang==="id") ? img.dataset.id : img.dataset.en;
 });
 
-/* VIDEO SWITCHER */
-document.querySelectorAll("video source[data-en]").forEach(source=>{
-    const videoEl = source.closest("video");
-    if(videoEl){
-      const newSrc = (lang==="id") ? source.dataset.id : source.dataset.en;
-      if(source.src !== newSrc){
-        source.src = newSrc;
-        videoEl.load();
-        videoEl.play().catch(e => console.log("Autoplay blocked"));
-      }
+/* VIDEO IFRAME SWITCHER */
+const mainVideoFrame = document.getElementById("mainVideoFrame");
+if(mainVideoFrame){
+    const newVidId = (lang === "id") ? mainVideoFrame.dataset.id : mainVideoFrame.dataset.en;
+    const newSrc = `https://drive.google.com/file/d/${newVidId}/preview`;
+    if(mainVideoFrame.src !== newSrc){
+        mainVideoFrame.src = newSrc;
     }
-});
+}
 
 /* DYNAMIC ELEMENTS */
 updateViewer();
@@ -141,7 +124,7 @@ function updateViewer(){
 let n=Math.floor(Math.random()*15)+8;
 let viewerEl = document.getElementById("viewer");
 if(viewerEl){
-    viewerEl.innerHTML = currentLang==="id"
+    viewerEl.innerHTML = currentLang==="en"
     ? "👀 "+n+" investor sedang melihat peluang ini"
     : "👀 "+n+" investors are viewing this opportunity";
 }
@@ -171,7 +154,6 @@ border-radius:12px;font-weight:700;display:inline-block;text-decoration:none;cur
 section{padding:40px 16px;max-width:900px;margin:auto;background:#f5f5f5;color:#111}
 h2{text-align:center;margin-bottom:12px}
 img{width:100%;border-radius:12px}
-.gif-video{width:100%;display:block;border-radius:12px;background:#000}
 
 .img-denah{width:70%;display:block;margin:0 auto 16px}
 .box{background:#fff;border-radius:16px;padding:12px}
@@ -204,10 +186,10 @@ color:#333;padding:10px;border-radius:14px;z-index:999;
     background:#000;
 }
 
-.video-wrapper1 video{
+.video-wrapper1 iframe{
     width:100%;
     height:100%;
-    object-fit:fill;
+    border:none;
     display:block;
 }
 
@@ -297,10 +279,6 @@ data-en="https://drive.google.com/thumbnail?id=17AwgZo6XAiM_XMeMfAiDvAw2BKg1ozst
 <section>
 <h2 data-id="Overview Lokasi Strategis & Akses" data-en="Strategic Location & Access Overview">Overview Lokasi Strategis & Akses</h2>
 
-<video class="gif-video" autoplay muted loop playsinline webkit-playsinline preload="auto" referrerpolicy="no-referrer" data-drive-id="1EAD1PQmt5jmvoCUdsHMchWk08BKpU2kh">
-    <source src="https://drive.usercontent.google.com/download?id=1EAD1PQmt5jmvoCUdsHMchWk08BKpU2kh&export=download&confirm=t" type="video/mp4">
-</video>
-
 <div style="text-align:center;margin-top:18px;">
 <a href="https://www.google.com/maps/place/8%C2%B013'11.8%22S+115%C2%B009'48.7%22E/@-8.2199444,115.1635278,691m/data=!3m2!1e3!4b1!4m4!3m3!8m2!3d-8.2199444!4d115.1635278!5m1!1e1?hl=en&entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D"
 target="_blank" class="btn" style="display:inline-block;"
@@ -316,12 +294,15 @@ data-id="📍 LIHAT LOKASI VIA GOOGLE MAPS" data-en="📍 VIEW LOCATION VIA GOOG
     🔥 <strong>Magnet Investor Baru:</strong> TURYAPADA TOWER & <br>AIR TERJUN
 </h2>
 
+<!-- VIDEO UTAMA MENGGUNAKAN IFRAME PREVIEW DRIVE (DIJAMIN PLAY & BERGANTI SAAT TOGGLE BAHASA) -->
 <div class="video-wrapper1">
-    <video autoplay muted controls loop playsinline webkit-playsinline preload="metadata" referrerpolicy="no-referrer" data-drive-id="12K1l5QWdS-7ldkvnFPrazssv6Rv_eKEa">
-        <source src="https://drive.usercontent.google.com/download?id=1w7O-rcaGcdYpxaKxWdxHK5HsJkjDb7Mt&export=download&confirm=t" type="video/mp4"
-         data-id="https://drive.usercontent.google.com/download?id=1w7O-rcaGcdYpxaKxWdxHK5HsJkjDb7Mt&export=download&confirm=t" type="video/mp4"
-         data-en="https://drive.usercontent.google.com/download?id=1UUUFnzP9212trHNgOJPfgI9kCElZsEkr&export=download&confirm=t" type="video/mp4">
-    </video>
+    <iframe id="mainVideoFrame" 
+            src="https://drive.google.com/file/d/1w7O-rcaGcdYpxaKxWdxHK5HsJkjDb7Mt/preview" 
+            data-id="1w7O-rcaGcdYpxaKxWdxHK5HsJkjDb7Mt" 
+            data-en="1UUUFnzP9212trHNgOJPfgI9kCElZsEkr" 
+            allow="autoplay; fullscreen" 
+            allowfullscreen>
+    </iframe>
 </div>
 
 <div class="video-title1" data-id="Ikonik Menara Turyapada" data-en="Turyapada Tower Iconic Landmark">Ikonik Menara Turyapada</div>
@@ -434,23 +415,6 @@ data-id="📍 LIHAT LOKASI VIA GOOGLE MAPS" data-en="📍 VIEW LOCATION VIA GOOG
 document.addEventListener("DOMContentLoaded",function(){
 setLang("en");
 updateViewer();
-
-const video = document.querySelector(".video-wrapper1 video");
-if(video){
-    video.muted = true;
-    const src = video.querySelector("source");
-    if(src) src.addEventListener("error", () => driveVideoFallback(video));
-    video.addEventListener("error", () => driveVideoFallback(video));
-    video.play().catch(e => console.log("Autoplay blocked"));
-}
-
-document.querySelectorAll("video.gif-video").forEach(v => {
-    v.muted = true;
-    const src = v.querySelector("source");
-    if(src) src.addEventListener("error", () => driveVideoFallback(v));
-    v.addEventListener("error", () => driveVideoFallback(v));
-    v.play().catch(e => console.log("Autoplay blocked"));
-});
 });
 
 setInterval(updateViewer,4000);
