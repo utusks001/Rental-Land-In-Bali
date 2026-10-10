@@ -51,6 +51,7 @@ document.addEventListener("error", function(e){
   }
 }, true);
 
+/* Video Drive: jika file langsung gagal diputar (limit/kuota/format), ganti ke player embed Drive */
 function driveVideoFallback(video){
   const id = video.dataset.driveId;
   if(!id || video.dataset.fallback) return;
@@ -65,6 +66,7 @@ function driveVideoFallback(video){
   video.replaceWith(iframe);
 }
 
+/* EVENT ID GENERATOR */
 function generateEventID(){
   return 'evt_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
 }
@@ -316,8 +318,8 @@ box-shadow:0 4px 12px rgba(0,0,0,0.15);
     Strategic Location & Access Overview
 </h2>
 
-<video class="gif-video" autoplay muted loop playsinline webkit-playsinline preload="auto" referrerpolicy="no-referrer" data-drive-id="1_Q78YTfA0raTz-XV7eGh-aTvMExpVc3N">
-    <source src="https://drive.usercontent.google.com/download?id=1_Q78YTfA0raTz-XV7eGh-aTvMExpVc3N&export=download&confirm=t" type="video/mp4">
+<video class="gif-video" autoplay muted loop playsinline webkit-playsinline preload="auto" referrerpolicy="no-referrer" data-drive-id="1EAD1PQmt5jmvoCUdsHMchWk08BKpU2kh">
+    <source src="https://drive.usercontent.google.com/download?id=1EAD1PQmt5jmvoCUdsHMchWk08BKpU2kh&export=download&confirm=t" type="video/mp4">
 </video>
 
 <div style="text-align:center;margin-top:18px;">
