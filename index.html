@@ -1,12 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="facebook-domain-verification" content="x2uuzy4e08n2skijnwv8zfea8wx2e4" />
-
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="x2uuzy4e08n2skijnwv8zfea8wx2e4" name="facebook-domain-verification">
 <title>Strategic Land North Bali | Premium Investment Opportunity</title>
-
 <script>
 !function(f,b,e,v,n,t,s){
 if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -21,9 +20,8 @@ s.parentNode.insertBefore(t,s)
 fbq('init', '1265687265197976');
 fbq('track', 'PageView');
 </script>
-
 <script>
-let currentLang = "en";
+const LANG = "en";
 
 /* ===== GOOGLE DRIVE MEDIA HELPERS ===== */
 function driveId(url){
@@ -56,204 +54,34 @@ function generateEventID(){
 return 'evt_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
 }
 
-/* LANGUAGE SWITCHER (MENGGANTI IFRAME VIDEO UTAMA SESUAI BAHASA) */
-function setLang(lang){
-currentLang = lang;
-
-/* TEXT */
-document.querySelectorAll("[data-en]").forEach(el=>{
-if(el.tagName!=="IMG" && el.tagName!=="IFRAME" && el.tagName!=="VIDEO" && el.tagName!=="SOURCE"){
-el.innerHTML = (lang==="id") ? el.dataset.id : el.dataset.en;
-}
-});
-
-/* IMAGE */
-document.querySelectorAll("img[data-en]").forEach(img=>{
-img.dataset.try = "0";
-img.src = (lang==="id") ? img.dataset.id : img.dataset.en;
-});
-
-/* VIDEO UTAMA (posisi & status play dipertahankan saat ganti bahasa) */
-updateMainVideo(lang);
-
-/* DYNAMIC ELEMENTS */
-updateViewer();
-}
-
-/* =====================================================================
-   VIDEO UTAMA
-   - Mode utama : <video> native (mp4 langsung) -> posisi & status play DIPERTAHANKAN
-   - Cadangan   : iframe Google Drive bila mp4 gagal dimuat (posisi TIDAK bisa dipertahankan,
-                  karena iframe Drive lintas-domain & tidak bisa dibaca/dikontrol dari halaman)
-
-   Alur saat toggle ID <-> EN:
-     1) CATAT  : currentTime + status (play / paused) video yang sedang tampil
-     2) GANTI  : src video ke bahasa baru
-     3) PULIHKAN setelah video baru siap (metadata -> canplay -> seek bila perlu):
-          - sebelumnya paused -> tetap paused (di detik yang sama)
-          - sebelumnya play   -> lanjut play dari detik yang sama
-   ===================================================================== */
-const MV = {
-    lang:null,
-    failed:{id:false,en:false},
-    tryIdx:{id:0,en:0},
-    pendingTime:0,      // posisi yang SEDANG menunggu dipulihkan (video baru belum siap)
-    pendingPlay:true,   // status play yang SEDANG menunggu dipulihkan
-    token:0,
-    timer:null
-};
-
-function mvCandidates(wrap, lang){
-    const u = (lang==="id") ? wrap.dataset.mp4Id : wrap.dataset.mp4En;
-    return u ? [u] : [];
-}
-
-function mvShowFrame(wrap, lang){
-    const video = document.getElementById("mainVideo");
-    const frame = document.getElementById("mainVideoFrame");
-    clearTimeout(MV.timer);
-    MV.token++;                         // batalkan semua listener video yang masih menunggu
-    video.pause();
-    video.removeAttribute("src");
-    video.load();                       // hentikan unduhan & suara video native
-    video.hidden = true;
-
-    const id  = (lang==="id") ? frame.dataset.id : frame.dataset.en;
-    const src = "https://drive.google.com/file/d/" + id + "/preview";
-    frame.hidden = false;
-    if(frame.dataset.cur !== src){      // src sama -> JANGAN dimuat ulang
-        frame.src = src;
-        frame.dataset.cur = src;
-    }
-}
-
-function mvPlayNative(wrap, lang, url, keepTime, shouldPlay){
-    const video = document.getElementById("mainVideo");
-    const frame = document.getElementById("mainVideoFrame");
-    const token = ++MV.token;
-    clearTimeout(MV.timer);
-
-    // simpan status yang menunggu dipulihkan (dipakai bila user toggle lagi sebelum video siap)
-    MV.pendingTime = keepTime;
-    MV.pendingPlay = shouldPlay;
-
-    // matikan iframe (dan suaranya) bila sebelumnya tampil
-    if(frame.dataset.cur){ frame.src = "about:blank"; frame.dataset.cur = ""; }
-    frame.hidden = true;
-    video.hidden = false;
-
-    let target = 0;
-
-    function cleanup(){
-        video.removeEventListener("loadedmetadata", onMeta);
-        video.removeEventListener("canplay", onCanPlay);
-        video.removeEventListener("seeked", onSeeked);
-        video.removeEventListener("error", onErr);
-        clearTimeout(MV.timer);
-    }
-
-    // 3) pulihkan status play / paused
-    function applyPlayState(){
-        if(token !== MV.token) return;
-        cleanup();
-        MV.pendingTime = 0;
-        MV.pendingPlay = true;
-        if(shouldPlay){
-            const p = video.play();
-            if(p && p.catch){
-                p.catch(function(){
-                    // autoplay ditolak browser -> coba lagi dalam keadaan muted agar tetap lanjut play
-                    video.muted = true;
-                    video.play().catch(()=>{});
-                });
-            }
-        }else{
-            video.pause();              // sebelumnya paused -> tetap paused
-        }
-    }
-
-    // 2) metadata siap -> lompat ke detik yang dicatat
-    function onMeta(){
-        if(token !== MV.token) return;
-        video.removeEventListener("loadedmetadata", onMeta);
-        clearTimeout(MV.timer);
-        if(keepTime > 0 && isFinite(video.duration)){
-            target = Math.min(keepTime, Math.max(video.duration - 0.1, 0));
-            try{ video.currentTime = target; }catch(e){}
-        }
-    }
-
-    // data cukup -> pastikan posisi benar (beberapa browser, mis. Safari/iOS, mengabaikan seek saat metadata)
-    function onCanPlay(){
-        if(token !== MV.token) return;
-        video.removeEventListener("canplay", onCanPlay);
-        if(target > 0 && Math.abs(video.currentTime - target) > 0.75){
-            video.addEventListener("seeked", onSeeked);
-            try{ video.currentTime = target; }catch(e){ applyPlayState(); }
-        }else{
-            applyPlayState();
-        }
-    }
-    function onSeeked(){
-        if(token !== MV.token) return;
-        video.removeEventListener("seeked", onSeeked);
-        applyPlayState();
-    }
-
-    function onErr(){
-        if(token !== MV.token) return;
-        cleanup();
-        console.warn("Video gagal dimuat:", url);
-        const list = mvCandidates(wrap, lang);
-        MV.tryIdx[lang]++;
-        if(MV.tryIdx[lang] < list.length){
-            mvPlayNative(wrap, lang, list[MV.tryIdx[lang]], keepTime, shouldPlay);
-        }else{
-            MV.failed[lang] = true;
-            mvShowFrame(wrap, lang);    // cadangan: iframe Drive
-        }
-    }
-
-    video.addEventListener("loadedmetadata", onMeta);
-    video.addEventListener("canplay", onCanPlay);
-    video.addEventListener("error", onErr);
-    MV.timer = setTimeout(function(){ if(token===MV.token && video.readyState===0) onErr(); }, 15000);
-
-    video.pause();                      // pastikan tidak ada audio/gambar lama yang jalan selama sumber diganti
-    video.src = url;
-    video.load();
-}
-
-function updateMainVideo(lang){
+/* VIDEO UTAMA: <video> native (mp4 di /videos/...), cadangan otomatis iframe Google Drive bila mp4 gagal dimuat */
+function initMainVideo(){
     const wrap  = document.getElementById("videoWrapper");
     const video = document.getElementById("mainVideo");
-    if(!wrap || !video) return;
-    if(MV.lang === lang) return;        // bahasa sama -> tidak ada reload, tidak berkedip
+    const frame = document.getElementById("mainVideoFrame");
+    if(!wrap || !video || !frame) return;
+    let done = false;
 
-    // 1) CATAT posisi & status play SEBELUM sumber diganti
-    let keepTime = 0, shouldPlay = true;            // default: pemuatan pertama = autoplay
-    if(MV.lang !== null && !video.hidden){          // mode native
-        if(video.readyState > 0){
-            // video sedang tampil normal -> baca nilai sebenarnya
-            keepTime   = video.currentTime;
-            shouldPlay = !video.paused && !video.ended;   // sedang paused -> tetap paused
-        }else{
-            // video lama belum siap (toggle cepat berturut-turut) -> pakai catatan yang tertunda
-            // (video.paused selalu true selama load, jadi tidak boleh dipakai di sini)
-            keepTime   = MV.pendingTime;
-            shouldPlay = MV.pendingPlay || !video.paused;
-        }
+    function useDrive(){
+        if(done) return;
+        done = true;
+        console.warn("[Video] mp4 gagal dimuat, memakai cadangan iframe Drive:", wrap.dataset.mp4);
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+        video.hidden = true;
+        frame.src = "https://drive.google.com/file/d/" + frame.dataset.drive + "/preview";
+        frame.hidden = false;
     }
-    MV.lang = lang;
 
-    // 2) GANTI sumber ke bahasa baru, lalu pulihkan (lihat mvPlayNative)
-    const list = mvCandidates(wrap, lang);
-    if(list.length && !MV.failed[lang]){
-        const url = list[Math.min(MV.tryIdx[lang], list.length-1)];
-        mvPlayNative(wrap, lang, url, keepTime, shouldPlay);
-    }else{
-        mvShowFrame(wrap, lang);
-    }
+    video.addEventListener("error", useDrive);
+    video.addEventListener("loadedmetadata", function(){ done = true; });
+    setTimeout(function(){ if(!done && video.readyState === 0) useDrive(); }, 15000);
+
+    video.src = wrap.dataset.mp4;       // src diisi lewat JS agar event error pasti tertangkap
+    video.load();
+    const p = video.play();
+    if(p && p.catch) p.catch(function(){});
 }
 
 /* OPTIMIZED TRACKING FUNCTION */
@@ -274,17 +102,13 @@ function trackLeadEvent(sourceName){
 /* WHATSAPP ACTIONS */
 function waInfo(){
 trackLeadEvent('info_button');
-let text = currentLang==="en"
-? "Halo, saya ingin info investasi tanah Bali Utara"
-: "Hello, I would like information about land investment in North Bali";
+let text = "Hello, I would like information about land investment in North Bali";
 window.open('https://wa.me/6281315373768?text='+encodeURIComponent(text),'_blank');
 }
 
 function waSurvey(){
 trackLeadEvent('survey_button');
-let text = currentLang==="en"
-? "Halo, saya ingin jadwalkan survey lokasi tanah Bali Utara"
-: "Hello, I would like to schedule a land survey in North Bali";
+let text = "Hello, I would like to schedule a land survey in North Bali";
 window.open('https://wa.me/6281315373768?text='+encodeURIComponent(text),'_blank');
 }
 
@@ -293,22 +117,13 @@ function updateViewer(){
 let n=Math.floor(Math.random()*15)+8;
 let viewerEl = document.getElementById("viewer");
 if(viewerEl){
-    viewerEl.innerHTML = currentLang==="id"
-    ? "👀 "+n+" investor sedang melihat peluang ini"
-    : "👀 "+n+" investors are viewing this opportunity";
+    viewerEl.innerHTML = "👀 "+n+" investors are viewing this opportunity";
 }
 }
 </script>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#08110a;color:#fff;line-height:1.6}
-
-#langToggle{position:fixed;top:20px;right:20px;z-index:1000;}
-#langToggle button{
-background:#fff;color:#000;border:none;padding:6px 10px;
-margin-left:5px;border-radius:6px;cursor:pointer;font-weight:700;
-}
 
 .hero{text-align:center;padding:60px 20px;background:linear-gradient(135deg,#061008,#102015,#061008)}
 .badge{background:#e60023;color:#fff;padding:10px 26px;border-radius:999px;font-size:13px;font-weight:700;margin-bottom:16px;display:inline-block;}
@@ -430,203 +245,135 @@ color:#333;padding:10px;border-radius:14px;z-index:999;
 .video-wrapper1 .drive-cover{ display:none; }
 .video-wrapper1 #mainVideoFrame:not([hidden]) + .drive-cover{ display:block; }
 </style>
-</head>
-
+</meta></head>
 <body>
 
-<div id="langToggle">
-<button onclick="setLang('id')">ID</button>
-<button onclick="setLang('en')">EN</button>
-</div>
-
 <div id="viewer"></div>
-
 <div class="hero">
-<div class="badge" data-id="EXCLUSIVE INVESTMENT OPPORTUNITY" data-en="EXCLUSIVE LONG-TERM LEASEHOLD (25-30+ YEARS)">EXCLUSIVE INVESTMENT OPPORTUNITY</div>
-
-<h1 data-id="💰 TANAH STRATEGIS<br>BALI UTARA" data-en="💰 PRIME DEVELOPMENT LAND<br>NORTH BALI">💰 TANAH STRATEGIS<br>BALI UTARA</h1>
-
-<p class="sub" data-id="• Potensi ROI Tinggi • Aset Langka Skala Besar <br>• Kenaikan Nilai Signifikan"
-data-en="• High ROI Potential • Fully Secure Lease Rights for Foreigners • Exceptional Capital Growth">
-• Potensi ROI Tinggi • Aset Langka Skala Besar <br>• Kenaikan Nilai Signifikan
-</p>
-
-<p class="desc" data-id="✔ Luas 6,5 Hektar Skala Pengembangan<br>✔ 12 SHM Lengkap & Siap Transaksi | 5 Lokasi yang berdekatan<br>✔ Dekat Ikon Wisata Baru TURYAPADA TOWER"
-data-en="✔ 6.5 Hectares Master Development Scale<br>✔ Long-Term Lease Deal (25–30 Years + Guaranteed Extension Rights)<br>✔ Minutes from the Landmark TURYAPADA TOWER">
-✔ Luas 6,5 Hektar Skala Pengembangan<br>✔ 12 SHM Lengkap & Siap Transaksi | 5 Lokasi yang berdekatan<br>✔ Dekat Ikon Wisata Baru TURYAPADA TOWER
-</p>
-
-<a class="btn" onclick="waInfo()" data-id="🚀 DAPATKAN INFO INVESTASI" data-en="🚀 REQUEST LEASEHOLD PROSPECTUS">🚀 DAPATKAN INFO INVESTASI</a>
+<div class="badge">EXCLUSIVE LONG-TERM LEASEHOLD (25-30+ YEARS)</div>
+<h1>💰 PRIME DEVELOPMENT LAND<br/>NORTH BALI</h1>
+<p class="sub">• High ROI Potential • Fully Secure Lease Rights for Foreigners • Exceptional Capital Growth</p>
+<p class="desc">✔ 6.5 Hectares Master Development Scale<br/>✔ Long-Term Lease Deal (25–30 Years + Guaranteed Extension Rights)<br/>✔ Minutes from the Landmark TURYAPADA TOWER</p>
+<a class="btn" onclick="waInfo()">🚀 REQUEST LEASEHOLD PROSPECTUS</a>
 </div>
-
 <section>
-<h2 data-id="Visual Kawasan & Potensi Pengembangan" data-en="Visual Overview & Masterplan Scope">Visual Kawasan & Potensi Pengembangan</h2>
-<img referrerpolicy="no-referrer" decoding="async" src="https://drive.google.com/thumbnail?id=17AwgZo6XAiM_XMeMfAiDvAw2BKg1ozst&sz=w1600"
-data-id="https://drive.google.com/thumbnail?id=1C0Ooxqdb4yZUeDzUWJduwyJ7pRh4fi3K&sz=w1600"
-data-en="https://drive.google.com/thumbnail?id=17AwgZo6XAiM_XMeMfAiDvAw2BKg1ozst&sz=w1600">
+<h2>Visual Overview &amp; Masterplan Scope</h2>
+<img decoding="async" referrerpolicy="no-referrer" src="https://drive.google.com/thumbnail?id=17AwgZo6XAiM_XMeMfAiDvAw2BKg1ozst&amp;sz=w1600"/>
 </section>
-
 <section>
-<h2 data-id="Overview Lokasi Strategis & Akses" data-en="Strategic Location & Access Overview">Overview Lokasi Strategis & Akses</h2>
-
+<h2>Strategic Location &amp; Access Overview</h2>
 <div style="width:100%; aspect-ratio:16/9; overflow:hidden; position:relative; border-radius:12px; background:#000;">
-    <iframe src="https://drive.google.com/file/d/1EAD1PQmt5jmvoCUdsHMchWk08BKpU2kh/preview" 
-            style="width:100%; height:100%; border:none; display:block;" 
-            allow="autoplay; fullscreen" 
-            allowfullscreen>
-    </iframe>
+<iframe allow="autoplay; fullscreen" allowfullscreen="" src="https://drive.google.com/file/d/1EAD1PQmt5jmvoCUdsHMchWk08BKpU2kh/preview" style="width:100%; height:100%; border:none; display:block;">
+</iframe>
     <div class="drive-cover" aria-hidden="true"></div>
 </div>
-
 <div style="text-align:center;margin-top:18px;">
-<a href="https://www.google.com/maps/place/8%C2%B013'11.8%22S+115%C2%B009'48.7%22E/@-8.2199444,115.1635278,691m/data=!3m2!1e3!4b1!4m4!3m3!8m2!3d-8.2199444!4d115.1635278!5m1!1e1?hl=en&entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D"
-target="_blank" class="btn" style="display:inline-block;"
-data-id="📍 LIHAT LOKASI VIA GOOGLE MAPS" data-en="📍 VIEW LOCATION VIA GOOGLE MAPS">
-📍 LIHAT LOKASI VIA GOOGLE MAPS
+<a class="btn" href="https://www.google.com/maps/place/8%C2%B013'11.8%22S+115%C2%B009'48.7%22E/@-8.2199444,115.1635278,691m/data=!3m2!1e3!4b1!4m4!3m3!8m2!3d-8.2199444!4d115.1635278!5m1!1e1?hl=en&amp;entry=ttu&amp;g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D" style="display:inline-block;" target="_blank">📍 VIEW LOCATION VIA GOOGLE MAPS</a>
+</div>
+</section>
+<section>
+<h2>🔥 <strong>Major Catalysts:</strong> TURYAPADA TOWER &amp; ECO-TOURISM WATERFALLS</h2>
+<!-- VIDEO UTAMA (EN) -->
+<div class="video-wrapper1" data-mp4="/videos/Turyapada_Tower_EN_dubbed_web.mp4" id="videoWrapper"><!-- PEMUTAR UTAMA: <video> native (mp4 di /videos/...). Cadangan: iframe Drive (otomatis bila mp4 gagal dimuat). Diatur oleh initMainVideo(). -->
+
+<video autoplay controls="" id="mainVideo" loop="" muted="" playsinline="" preload="auto" webkit-playsinline=""></video>
+
+<iframe allow="autoplay; fullscreen" allowfullscreen="" data-drive="1dXN0fc60i9BAMdh9n5yS9QtGTmc5D85e" hidden="" id="mainVideoFrame">
+</iframe>
+    <div class="drive-cover" aria-hidden="true"></div>
+</div>
+<div class="video-title1">Turyapada Tower Iconic Landmark</div>
+<br/>
+<div class="video-wrapper">
+<div class="video-box">
+<div class="video-container">
+<iframe allowfullscreen="" src="https://www.youtube.com/embed/NkX5nbY_Rdk"></iframe>
+</div>
+<div class="video-title">Tirta Buana Waterfall</div>
+</div>
+<div class="video-box">
+<div class="video-container">
+<iframe allowfullscreen="" src="https://www.youtube.com/embed/EnP-XhNDFmY"></iframe>
+</div>
+<div class="video-title">Fiji Lemukih Waterfall</div>
+</div>
+</div>
+<div class="video-wrapper">
+<div class="video-box">
+<div class="video-container">
+<iframe allowfullscreen="" src="https://www.youtube.com/embed/Chei5MTPtz0"></iframe>
+</div>
+<div class="video-title">Sekumpul Waterfall</div>
+</div>
+<div class="video-box">
+<div class="video-container">
+<iframe allowfullscreen="" src="https://www.youtube.com/embed/l7aDhoq3QpE"></iframe>
+</div>
+<div class="video-title">Gitgit Waterfall</div>
+</div>
+</div>
+<div class="box">
+<div class="item">🏗 New Tourism &amp; Telecommunication Megaproject in North Bali</div>
+<div class="item">🌄 Over 100-meter height offering 360° ocean &amp; mountain views</div>
+<div class="item">🌉 Glass bridge &amp; skywalk destination</div>
+<div class="item">🍽 Revolving 360° luxury restaurant &amp; planetarium</div>
+<div class="item">🚡 1.1 KM gondola connecting tourism destinations</div>
+<div class="item">📈 Exponential driver for land values &amp; high-net-worth tourism</div>
+<div class="item">💦 Near Tirta Buana Waterfall (Only 5 Minutes)</div>
+<div class="item">🌊 Fiji Lemukih Waterfall (Only 15 Minutes)</div>
+<div class="item">🌿 Sekumpul Waterfall (Only 25 Minutes)</div>
+<div class="item">🏞 Gitgit Waterfall (Only 30 Minutes)</div>
+</div>
+</section>
+<section>
+<h2>Why Institutional &amp; Private Investors Are Moving In</h2>
+<div class="box">
+<div class="item">✔ Direct proximity to Turyapada Tower landmark</div>
+<div class="item">✔ Surrounded by world-class eco-tourism waterfalls</div>
+<div class="item">✔ Rapidly expanding luxury tourism corridor</div>
+<div class="item">✔ Clean legal structure (Fully compliant lease agreements for foreigner)</div>
+<div class="item">✔ Panoramic ocean and mountain ridge topography</div>
+<div class="item">✔ High projected yield ROI with high investment returns</div>
+<div class="item">✔ Large scale development</div>
+</div>
+</section>
+<section>
+<h2>Master Development Concepts &amp; Monetization Potential</h2>
+<div class="box">
+<div class="item">🏡 Luxury Eco-Resort &amp; Private Pool Villas</div>
+<div class="item">⛺ High-End Glamping &amp; Wellness Retreat</div>
+<div class="item">☕ Panoramic Sunset Café &amp; Dining Hub</div>
+<div class="item">⛳ Integrated Cultural &amp; Nature Experience Park</div>
+<div class="item">🏌️‍♂️ Luxury Development</div>
+</div>
+</section>
+<section>
+<h2>Asset Specifications &amp; Lease Terms Investment Value</h2>
+<div style="text-align:center; margin-top:20px;">
+<a href="https://earth.google.com/web/@-8.21679688,115.11452907,1062.10582097a,23915.04159486d,35y,0h,0t,0r/data=CgRCAggBMikKJwolCiExcVRNSWxOUjBoM3JoZU9JV3R1Q0J1TmhDNEhBbjdaT18gAToDCgEwQgIIAEoICOz8hckBEAE?hl=en&amp;pli=1&amp;authuser=1" target="_blank">
+<img alt="Google Earth Location" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://drive.google.com/thumbnail?id=1SABnK6L5QR0C7O3h2yLdsjJGu9iOWScS&amp;sz=w1600" style="width:100%;max-width:950px;border-radius:18px;box-shadow:0 6px 20px rgba(0,0,0,0.25);margin-bottom:18px;cursor:pointer;"/>
 </a>
 </div>
-</section>
-
-<section>
-<h2 data-id="🔥 <strong>Magnet Investor Baru:</strong> TURYAPADA TOWER & <br>AIR TERJUN"
-    data-en="🔥 <strong>Major Catalysts:</strong> TURYAPADA TOWER & ECO-TOURISM WATERFALLS">
-    🔥 <strong>Magnet Investor Baru:</strong> TURYAPADA TOWER & <br>AIR TERJUN
-</h2>
-
-<!-- VIDEO UTAMA: <video> native (posisi & status play terjaga saat toggle ID/EN), cadangan iframe Google Drive -->
-<div class="video-wrapper1" id="videoWrapper"
-     data-mp4-id="/videos/Menara-Turyapada.mp4"
-     data-mp4-en="/videos/Turyapada_Tower_EN_dubbed_web.mp4">
-
-    <!-- PEMUTAR UTAMA: <video> native (file mp4 di project Vercel: /videos/...) -> posisi & status play terjaga saat toggle ID/EN.
-         Tanpa atribut autoplay: play dikontrol JS supaya status paused ikut terjaga. -->
-    <video id="mainVideo" muted controls loop playsinline webkit-playsinline preload="auto"></video>
-
-    <!-- CADANGAN: iframe Drive (dipakai otomatis hanya jika mp4 gagal dimuat).
-         src sengaja tidak diisi di HTML agar tidak ada pemuatan ganda / berkedip saat halaman dibuka. -->
-    <iframe id="mainVideoFrame" hidden
-            data-id="12K1l5QWdS-7ldkvnFPrazssv6Rv_eKEa"
-            data-en="1dXN0fc60i9BAMdh9n5yS9QtGTmc5D85e"
-            allow="autoplay; fullscreen"
-            allowfullscreen>
-    </iframe>
-    <div class="drive-cover" aria-hidden="true"></div>
-</div>
-
-<div class="video-title1" data-id="Ikonik Menara Turyapada" data-en="Turyapada Tower Iconic Landmark">Ikonik Menara Turyapada</div>
-<br>
-
-<div class="video-wrapper">
-    <div class="video-box">
-        <div class="video-container">
-            <iframe src="https://www.youtube.com/embed/NkX5nbY_Rdk" allowfullscreen></iframe>
-        </div>
-        <div class="video-title" data-id="Air Terjun Tirta Buana" data-en="Tirta Buana Waterfall">Tirta Buana Waterfall</div>
-    </div>
-
-    <div class="video-box">
-        <div class="video-container">
-            <iframe src="https://www.youtube.com/embed/EnP-XhNDFmY" allowfullscreen></iframe>
-        </div>
-        <div class="video-title" data-id="Air Terjun Fiji Lemukih" data-en="Fiji Lemukih Waterfall">Fiji Lemukih Waterfall</div>
-    </div>  
-</div>
-
-<div class="video-wrapper">
-    <div class="video-box">
-        <div class="video-container">
-            <iframe src="https://www.youtube.com/embed/Chei5MTPtz0" allowfullscreen></iframe>
-        </div>
-        <div class="video-title" data-id="Air Terjun Sekumpul" data-en="Sekumpul Waterfall">Sekumpul Waterfall</div>
-    </div>
-
-    <div class="video-box">
-        <div class="video-container">
-            <iframe src="https://www.youtube.com/embed/l7aDhoq3QpE" allowfullscreen></iframe>
-        </div>
-        <div class="video-title" data-id="Air Terjun Gitgit" data-en="Gitgit Waterfall">Gitgit Waterfall</div>
-    </div>
-</div>
-
 <div class="box">
-    <div class="item" data-id="🏗 Ikon Wisata & Mega Proyek Telekomunikasi di Bali Utara" data-en="🏗 New Tourism & Telecommunication Megaproject in North Bali">🏗 Ikon Wisata & Mega Proyek Telekomunikasi di Bali Utara</div>
-    <div class="item" data-id="🌄 Ketinggian 100+ meter dengan 360° panorama laut & pegunungan" data-en="🌄 Over 100-meter height offering 360° ocean & mountain views">🌄 Ketinggian 100+ meter dengan 360° panorama laut & pegunungan</div>
-    <div class="item" data-id="🌉 Skywalk & jembatan kaca pertama di kawasan ini" data-en="🌉 Glass bridge & skywalk destination">🌉 Skywalk & jembatan kaca pertama di kawasan ini</div>
-    <div class="item" data-id="🍽 Restoran 360° + Planetarium modern" data-en="🍽 Revolving 360° luxury restaurant & planetarium">🍽 Restoran 360° + Planetarium modern</div>
-    <div class="item" data-id="🚡 Gondola 1,1 KM menghubungkan kawasan wisata" data-en="🚡 1.1 KM gondola connecting tourism destinations">🚡 Gondola 1,1 KM menghubungkan kawasan wisata</div>
-    <div class="item" data-id="📈 Pemicu lonjakan nilai tanah & pariwisata kelas atas" data-en="📈 Exponential driver for land values & high-net-worth tourism">📈 Pemicu lonjakan nilai tanah & pariwisata kelas atas</div>
-    <div class="item" data-id="💦 Dekat Air Terjun Tirta Buana (Hanya 5 Menit)" data-en="💦 Near Tirta Buana Waterfall (Only 5 Minutes)">💦 Near Tirta Buana Waterfall (Only 5 Minutes)</div>
-    <div class="item" data-id="🌊 Air Terjun Fiji Lemukih (Hanya 15 Menit)" data-en="🌊 Fiji Lemukih Waterfall (Only 15 Minutes)">🌊 Fiji Lemukih Waterfall (Only 15 Minutes)</div>
-    <div class="item" data-id="🌿 Air Terjun Sekumpul (Hanya 25 Menit)" data-en="🌿 Sekumpul Waterfall (Only 25 Minutes)">🌿 Sekumpul Waterfall (Only 25 Minutes)</div>
-    <div class="item" data-id="🏞 Air Terjun Gitgit (Hanya 30 Menit)" data-en="🏞 Gitgit Waterfall (Only 30 Minutes)">🏞 Gitgit Waterfall (Only 30 Minutes)</div>
+<div class="item price">💰 Attractive Lease Rate: IDR 50 Million / Are / Year (1 Are = 100 m²)</div>
+<div class="item">📐 Total Land Area: 6.51 Hectares (651.2 Are) — <strong>Bulk Master-Lease Discount Available</strong>.</div>
+<div class="item">📄 Tenure Structure: 25 to 30 Years Guaranteed Initial Lease + Legally Binding Renewal Options (Indonesian Hak Sewa / PMA Compliant)</div>
+<div class="item">📍 Location: Sukasada, Buleleng, North Bali Regency</div>
 </div>
 </section>
-
-<section>
-<h2 data-id="Alasan Investor Institusional & Swasta Mulai Masuk" data-en="Why Institutional & Private Investors Are Moving In">Alasan Investor Institusional & Swasta Mulai Masuk</h2>
-<div class="box">
-<div class="item" data-id="✔ Dekat Turyapada Tower" data-en="✔ Direct proximity to Turyapada Tower landmark">✔ Dekat Turyapada Tower</div>
-<div class="item" data-id="✔ Dekat Beberapa Air Terjun" data-en="✔ Surrounded by world-class eco-tourism waterfalls">✔ Dekat Beberapa Air Terjun</div>
-<div class="item" data-id="✔ Jalur wisata berkembang pesat" data-en="✔ Rapidly expanding luxury tourism corridor">✔ Jalur wisata berkembang pesat</div>
-<div class="item" data-id="✔ Legalitas lengkap dengan sepenuhnya patuh hukum" data-en="✔ Clean legal structure (Fully compliant lease agreements for foreigner)">✔ Legalitas lengkap dengan sepenuhnya patuh hukum</div>
-<div class="item" data-id="Topografi lanskap laut dan pegunungan yang panoramik" data-en="✔ Panoramic ocean and mountain ridge topography">✔ Premium landscape view</div>
-<div class="item" data-id="✔ Proyeksi ROI dengan keuntungan investasi tinggi" data-en="✔ High projected yield ROI with high investment returns">✔ Proyeksi ROI dengan keuntungan investasi tinggi</div>
-<div class="item" data-id="✔ Pengembangan skala besar" data-en="✔ Large scale development">✔ Pengembangan skala besar</div>
-</div>
-</section>
-
-<section>
-<h2 data-id="Konsep Pengembangan Utama & Potensi Monetisasi" data-en="Master Development Concepts & Monetization Potential">Development & Monetization Potential</h2>
-<div class="box">
-<div class="item" data-id="🏡 Eko-Resor Mewah & Vila dengan Kolam Renang Pribadi" data-en="🏡 Luxury Eco-Resort & Private Pool Villas">🏡 Eko-Resor Mewah & Vila dengan Kolam Renang Pribadi</div>
-<div class="item" data-id="⛺ Glamping & Tempat Relaksasi Kesehatan" data-en="⛺ High-End Glamping & Wellness Retreat">⛺ Glamping & Tempat Relaksasi Kesehatan</div>
-<div class="item" data-id="☕ Kafe Panorama Matahari Terbenam & Pusat Kuliner" data-en="☕ Panoramic Sunset Café & Dining Hub">☕ Kafe Panorama Matahari Terbenam & Pusat Kuliner</div>
-<div class="item" data-id="⛳ Taman Edukasi dengan Pengalaman Budaya dan Alam Terpadu" data-en="⛳ Integrated Cultural & Nature Experience Park">⛳ Taman Edukasi dengan Pengalaman Budaya dan Alam Terpadu</div>
-<div class="item" data-id="🏌️‍♂️ Luxury Development" data-en="🏌️‍♂️ Luxury Development">🏌️‍♂️ Luxury Development</div>
-</div>
-</section>
-
-<section>
-<h2 data-id="Spesifikasi Aset & Nilai Investasi" data-en="Asset Specifications & Lease Terms Investment Value">Asset Details & Investment Value</h2>
-
-<div style="text-align:center; margin-top:20px;">
-    <a href="https://earth.google.com/web/@-8.21679688,115.11452907,1062.10582097a,23915.04159486d,35y,0h,0t,0r/data=CgRCAggBMikKJwolCiExcVRNSWxOUjBoM3JoZU9JV3R1Q0J1TmhDNEhBbjdaT18gAToDCgEwQgIIAEoICOz8hckBEAE?hl=id&pli=1&authuser=1"
-       target="_blank">
-        <img referrerpolicy="no-referrer" loading="lazy" decoding="async"
-        src="https://drive.google.com/thumbnail?id=1SABnK6L5QR0C7O3h2yLdsjJGu9iOWScS&sz=w1600"
-        alt="Google Earth Location"
-        style="width:100%;max-width:950px;border-radius:18px;box-shadow:0 6px 20px rgba(0,0,0,0.25);margin-bottom:18px;cursor:pointer;">
-    </a>
-</div>
-
-<div class="box">
-<div class="item price" data-id="💰 Harga: Rp 50 Juta / Are (100 m²)" data-en="💰 Attractive Lease Rate: IDR 50 Million / Are / Year (1 Are = 100 m²)">💰 Harga: Rp 50 Juta / Are (100 m²)</div>
-<div class="item"
-     data-id="📐 Total Luas Tanah: 651,2 Are — <strong>Harga Khusus untuk Pembelian Keseluruhan</strong>."
-     data-en="📐 Total Land Area: 6.51 Hectares (651.2 Are) — <strong>Bulk Master-Lease Discount Available</strong>.">
-     📐 Total Luas Tanah: 651,2 Are — <strong>Harga Khusus untuk Pembelian Keseluruhan</strong>.
-</div>
-<div class="item" data-id="📄 Legalitas: 12 SHM" data-en="📄 Tenure Structure: 25 to 30 Years Guaranteed Initial Lease + Legally Binding Renewal Options (Indonesian Hak Sewa / PMA Compliant)">📄 Legalitas: 12 SHM</div>
-<div class="item" data-id="📍 Lokasi: Sukasada, Buleleng, Bali Utara" data-en="📍 Location: Sukasada, Buleleng, North Bali Regency">📍 Lokasi: Sukasada, Buleleng, Bali Utara</div>
-</div>
-</section>
-
 <section class="cta">
-<div class="cta-title" data-id="⚠️ MOMENTUM KAWASAN BALI UTARA SEDANG NAIK" data-en="⚠️ SECURE YOUR POSITION IN NORTH BALI'S BOOM">⚠️ MOMENTUM KAWASAN BALI UTARA SEDANG NAIK</div>
-<p data-id="Masuk sekarang sebelum harga melonjak" data-en="Acquire early leasehold rights prior to major infrastructure completion">Masuk sekarang sebelum harga melonjak</p>
-<a class="btn" onclick="waSurvey()" data-id="🔥 JADWALKAN SURVEY LOKASI" data-en="🔥 SCHEDULE PRIVATE SITE INSPECTION">🔥 JADWALKAN SURVEY LOKASI</a>
+<div class="cta-title">⚠️ SECURE YOUR POSITION IN NORTH BALI'S BOOM</div>
+<p>Acquire early leasehold rights prior to major infrastructure completion</p>
+<a class="btn" onclick="waSurvey()">🔥 SCHEDULE PRIVATE SITE INSPECTION</a>
 </section>
-
-<div id="floatingWA" onclick="waInfo()" data-id="💬 Info Investasi Lebih Lanjut" data-en="💬 Direct Investor Inquiry">💬 Info Investasi Lebih Lanjut</div>
-
+<div id="floatingWA" onclick="waInfo()">💬 Direct Investor Inquiry</div>
 <script>
 document.addEventListener("DOMContentLoaded",function(){
-setLang("en");
+initMainVideo();
 updateViewer();
 });
 
 setInterval(updateViewer,4000);
 </script>
-
 </body>
 </html>
