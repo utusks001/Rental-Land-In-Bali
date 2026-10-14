@@ -82,11 +82,26 @@ updateViewer();
 
 /* =====================================================================
    VIDEO UTAMA
-   - Mode utama : <video> native (mp4 langsung) -> posisi & status play BISA dipertahankan
+   - Mode utama : <video> native (mp4 langsung) -> posisi & status play DIPERTAHANKAN
    - Cadangan   : iframe Google Drive bila mp4 gagal dimuat (posisi TIDAK bisa dipertahankan,
                   karena iframe Drive lintas-domain & tidak bisa dibaca/dikontrol dari halaman)
+
+   Alur saat toggle ID <-> EN:
+     1) CATAT  : currentTime + status (play / paused) video yang sedang tampil
+     2) GANTI  : src video ke bahasa baru
+     3) PULIHKAN setelah video baru siap (metadata -> canplay -> seek bila perlu):
+          - sebelumnya paused -> tetap paused (di detik yang sama)
+          - sebelumnya play   -> lanjut play dari detik yang sama
    ===================================================================== */
-const MV = { lang:null, failed:{id:false,en:false}, tryIdx:{id:0,en:0}, pendingTime:0, token:0, timer:null };
+const MV = {
+    lang:null,
+    failed:{id:false,en:false},
+    tryIdx:{id:0,en:0},
+    pendingTime:0,      // posisi yang SEDANG menunggu dipulihkan (video baru belum siap)
+    pendingPlay:true,   // status play yang SEDANG menunggu dipulihkan
+    token:0,
+    timer:null
+};
 
 function mvCandidates(wrap, lang){
     const u = (lang==="id") ? wrap.dataset.mp4Id : wrap.dataset.mp4En;
@@ -97,6 +112,7 @@ function mvShowFrame(wrap, lang){
     const video = document.getElementById("mainVideo");
     const frame = document.getElementById("mainVideoFrame");
     clearTimeout(MV.timer);
+    MV.token++;                         // batalkan semua listener video yang masih menunggu
     video.pause();
     video.removeAttribute("src");
     video.load();                       // hentikan unduhan & suara video native
@@ -117,27 +133,73 @@ function mvPlayNative(wrap, lang, url, keepTime, shouldPlay){
     const token = ++MV.token;
     clearTimeout(MV.timer);
 
+    // simpan status yang menunggu dipulihkan (dipakai bila user toggle lagi sebelum video siap)
+    MV.pendingTime = keepTime;
+    MV.pendingPlay = shouldPlay;
+
     // matikan iframe (dan suaranya) bila sebelumnya tampil
     if(frame.dataset.cur){ frame.src = "about:blank"; frame.dataset.cur = ""; }
     frame.hidden = true;
     video.hidden = false;
 
+    let target = 0;
+
     function cleanup(){
         video.removeEventListener("loadedmetadata", onMeta);
+        video.removeEventListener("canplay", onCanPlay);
+        video.removeEventListener("seeked", onSeeked);
         video.removeEventListener("error", onErr);
         clearTimeout(MV.timer);
     }
-    function onMeta(){
+
+    // 3) pulihkan status play / paused
+    function applyPlayState(){
         if(token !== MV.token) return;
         cleanup();
         MV.pendingTime = 0;
-        try{
-            if(keepTime > 0 && isFinite(video.duration)){
-                video.currentTime = Math.min(keepTime, Math.max(video.duration - 0.1, 0));
+        MV.pendingPlay = true;
+        if(shouldPlay){
+            const p = video.play();
+            if(p && p.catch){
+                p.catch(function(){
+                    // autoplay ditolak browser -> coba lagi dalam keadaan muted agar tetap lanjut play
+                    video.muted = true;
+                    video.play().catch(()=>{});
+                });
             }
-        }catch(e){}
-        if(shouldPlay){ video.play().catch(()=>{}); }
+        }else{
+            video.pause();              // sebelumnya paused -> tetap paused
+        }
     }
+
+    // 2) metadata siap -> lompat ke detik yang dicatat
+    function onMeta(){
+        if(token !== MV.token) return;
+        video.removeEventListener("loadedmetadata", onMeta);
+        clearTimeout(MV.timer);
+        if(keepTime > 0 && isFinite(video.duration)){
+            target = Math.min(keepTime, Math.max(video.duration - 0.1, 0));
+            try{ video.currentTime = target; }catch(e){}
+        }
+    }
+
+    // data cukup -> pastikan posisi benar (beberapa browser, mis. Safari/iOS, mengabaikan seek saat metadata)
+    function onCanPlay(){
+        if(token !== MV.token) return;
+        video.removeEventListener("canplay", onCanPlay);
+        if(target > 0 && Math.abs(video.currentTime - target) > 0.75){
+            video.addEventListener("seeked", onSeeked);
+            try{ video.currentTime = target; }catch(e){ applyPlayState(); }
+        }else{
+            applyPlayState();
+        }
+    }
+    function onSeeked(){
+        if(token !== MV.token) return;
+        video.removeEventListener("seeked", onSeeked);
+        applyPlayState();
+    }
+
     function onErr(){
         if(token !== MV.token) return;
         cleanup();
@@ -153,9 +215,11 @@ function mvPlayNative(wrap, lang, url, keepTime, shouldPlay){
     }
 
     video.addEventListener("loadedmetadata", onMeta);
+    video.addEventListener("canplay", onCanPlay);
     video.addEventListener("error", onErr);
     MV.timer = setTimeout(function(){ if(token===MV.token && video.readyState===0) onErr(); }, 15000);
 
+    video.pause();                      // pastikan tidak ada audio/gambar lama yang jalan selama sumber diganti
     video.src = url;
     video.load();
 }
@@ -166,16 +230,23 @@ function updateMainVideo(lang){
     if(!wrap || !video) return;
     if(MV.lang === lang) return;        // bahasa sama -> tidak ada reload, tidak berkedip
 
-    // 1) tangkap posisi & status play SEBELUM sumber diganti
+    // 1) CATAT posisi & status play SEBELUM sumber diganti
     let keepTime = 0, shouldPlay = true;            // default: pemuatan pertama = autoplay
     if(MV.lang !== null && !video.hidden){          // mode native
-        keepTime   = (video.readyState > 0) ? video.currentTime : MV.pendingTime;
-        shouldPlay = !video.paused && !video.ended; // sedang paused -> tetap paused
+        if(video.readyState > 0){
+            // video sedang tampil normal -> baca nilai sebenarnya
+            keepTime   = video.currentTime;
+            shouldPlay = !video.paused && !video.ended;   // sedang paused -> tetap paused
+        }else{
+            // video lama belum siap (toggle cepat berturut-turut) -> pakai catatan yang tertunda
+            // (video.paused selalu true selama load, jadi tidak boleh dipakai di sini)
+            keepTime   = MV.pendingTime;
+            shouldPlay = MV.pendingPlay || !video.paused;
+        }
     }
-    MV.pendingTime = keepTime;
     MV.lang = lang;
 
-    // 2) tampilkan sumber untuk bahasa baru
+    // 2) GANTI sumber ke bahasa baru, lalu pulihkan (lihat mvPlayNative)
     const list = mvCandidates(wrap, lang);
     if(list.length && !MV.failed[lang]){
         const url = list[Math.min(MV.tryIdx[lang], list.length-1)];
