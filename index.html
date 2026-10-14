@@ -99,6 +99,8 @@ const MV = {
     tryIdx:{id:0,en:0},
     pendingTime:0,      // posisi yang SEDANG menunggu dipulihkan (video baru belum siap)
     pendingPlay:true,   // status play yang SEDANG menunggu dipulihkan
+    blobs:{id:null,en:null}, // cache blob mp4 (dipakai hanya jika server tidak mendukung Range/seek)
+    blobLoading:false,
     token:0,
     timer:null
 };
@@ -112,6 +114,7 @@ function mvShowFrame(wrap, lang){
     const video = document.getElementById("mainVideo");
     const frame = document.getElementById("mainVideoFrame");
     clearTimeout(MV.timer);
+    console.warn("[Video] MODE CADANGAN (iframe Drive): mp4 gagal dimuat, posisi & status play TIDAK bisa dipertahankan. Periksa file /videos/... di server.");
     MV.token++;                         // batalkan semua listener video yang masih menunggu
     video.pause();
     video.removeAttribute("src");
@@ -127,11 +130,17 @@ function mvShowFrame(wrap, lang){
     }
 }
 
-function mvPlayNative(wrap, lang, url, keepTime, shouldPlay){
+function mvCanSeek(video, t){
+    const s = video.seekable;
+    return s && s.length > 0 && s.end(s.length-1) >= t - 0.5;
+}
+
+function mvPlayNative(wrap, lang, url, keepTime, shouldPlay, isBlob){
     const video = document.getElementById("mainVideo");
     const frame = document.getElementById("mainVideoFrame");
     const token = ++MV.token;
     clearTimeout(MV.timer);
+    MV.blobLoading = false;
 
     // simpan status yang menunggu dipulihkan (dipakai bila user toggle lagi sebelum video siap)
     MV.pendingTime = keepTime;
@@ -183,10 +192,33 @@ function mvPlayNative(wrap, lang, url, keepTime, shouldPlay){
         }
     }
 
+    // server TIDAK mendukung Range -> video tidak bisa di-seek -> posisi selalu kembali ke 0.
+    // Solusi: unduh mp4 sebagai blob (selalu bisa di-seek), lalu pulihkan posisi & status dari blob itu.
+    function useBlob(){
+        cleanup();
+        MV.blobLoading = true;          // selama mengunduh, pakai catatan tertunda (bukan currentTime video)
+        video.pause();
+        console.info("[Video] Server tidak mendukung seek (Range). Mengunduh mp4 sebagai blob agar posisi bisa dipulihkan...");
+        fetch(url).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.blob(); })
+        .then(function(b){
+            if(token !== MV.token) return;
+            MV.blobs[lang] = URL.createObjectURL(b);
+            mvPlayNative(wrap, lang, MV.blobs[lang], keepTime, shouldPlay, true);
+        })
+        .catch(function(err){
+            if(token !== MV.token) return;
+            console.warn("[Video] Unduh blob gagal:", err);
+            MV.blobLoading = false;
+            target = 0;
+            applyPlayState();           // terpaksa: lanjutkan dari awal, status play/paused tetap dijaga
+        });
+    }
+
     // data cukup -> pastikan posisi benar (beberapa browser, mis. Safari/iOS, mengabaikan seek saat metadata)
     function onCanPlay(){
         if(token !== MV.token) return;
         video.removeEventListener("canplay", onCanPlay);
+        if(target > 0 && !isBlob && !mvCanSeek(video, target)){ useBlob(); return; }
         if(target > 0 && Math.abs(video.currentTime - target) > 0.75){
             video.addEventListener("seeked", onSeeked);
             try{ video.currentTime = target; }catch(e){ applyPlayState(); }
@@ -197,6 +229,7 @@ function mvPlayNative(wrap, lang, url, keepTime, shouldPlay){
     function onSeeked(){
         if(token !== MV.token) return;
         video.removeEventListener("seeked", onSeeked);
+        if(target > 0 && !isBlob && Math.abs(video.currentTime - target) > 1.5){ useBlob(); return; }
         applyPlayState();
     }
 
@@ -233,7 +266,7 @@ function updateMainVideo(lang){
     // 1) CATAT posisi & status play SEBELUM sumber diganti
     let keepTime = 0, shouldPlay = true;            // default: pemuatan pertama = autoplay
     if(MV.lang !== null && !video.hidden){          // mode native
-        if(video.readyState > 0){
+        if(video.readyState > 0 && !MV.blobLoading){
             // video sedang tampil normal -> baca nilai sebenarnya
             keepTime   = video.currentTime;
             shouldPlay = !video.paused && !video.ended;   // sedang paused -> tetap paused
@@ -249,8 +282,9 @@ function updateMainVideo(lang){
     // 2) GANTI sumber ke bahasa baru, lalu pulihkan (lihat mvPlayNative)
     const list = mvCandidates(wrap, lang);
     if(list.length && !MV.failed[lang]){
-        const url = list[Math.min(MV.tryIdx[lang], list.length-1)];
-        mvPlayNative(wrap, lang, url, keepTime, shouldPlay);
+        const cached = MV.blobs[lang];
+        const url = cached || list[Math.min(MV.tryIdx[lang], list.length-1)];
+        mvPlayNative(wrap, lang, url, keepTime, shouldPlay, !!cached);
     }else{
         mvShowFrame(wrap, lang);
     }
