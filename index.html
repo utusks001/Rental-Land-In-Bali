@@ -62,7 +62,7 @@ currentLang = lang;
 
 /* TEXT */
 document.querySelectorAll("[data-en]").forEach(el=>{
-if(el.tagName!=="IMG"){
+if(el.tagName!=="IMG" && el.tagName!=="IFRAME" && el.tagName!=="VIDEO" && el.tagName!=="SOURCE"){
 el.innerHTML = (lang==="id") ? el.dataset.id : el.dataset.en;
 }
 });
@@ -73,18 +73,116 @@ img.dataset.try = "0";
 img.src = (lang==="id") ? img.dataset.id : img.dataset.en;
 });
 
-/* VIDEO IFRAME SWITCHER */
-const mainVideoFrame = document.getElementById("mainVideoFrame");
-if(mainVideoFrame){
-    const newVidId = (lang === "id") ? mainVideoFrame.dataset.id : mainVideoFrame.dataset.en;
-    const newSrc = `https://drive.google.com/file/d/${newVidId}/preview`;
-    if(mainVideoFrame.src !== newSrc){
-        mainVideoFrame.src = newSrc;
-    }
-}
+/* VIDEO UTAMA (posisi & status play dipertahankan saat ganti bahasa) */
+updateMainVideo(lang);
 
 /* DYNAMIC ELEMENTS */
 updateViewer();
+}
+
+/* =====================================================================
+   VIDEO UTAMA
+   - Mode utama : <video> native (mp4 langsung) -> posisi & status play BISA dipertahankan
+   - Cadangan   : iframe Google Drive bila mp4 gagal dimuat (posisi TIDAK bisa dipertahankan,
+                  karena iframe Drive lintas-domain & tidak bisa dibaca/dikontrol dari halaman)
+   ===================================================================== */
+const MV = { lang:null, failed:{id:false,en:false}, tryIdx:{id:0,en:0}, pendingTime:0, token:0, timer:null };
+
+function mvCandidates(wrap, lang){
+    const u = (lang==="id") ? wrap.dataset.mp4Id : wrap.dataset.mp4En;
+    return u ? [u] : [];
+}
+
+function mvShowFrame(wrap, lang){
+    const video = document.getElementById("mainVideo");
+    const frame = document.getElementById("mainVideoFrame");
+    clearTimeout(MV.timer);
+    video.pause();
+    video.removeAttribute("src");
+    video.load();                       // hentikan unduhan & suara video native
+    video.hidden = true;
+
+    const id  = (lang==="id") ? frame.dataset.id : frame.dataset.en;
+    const src = "https://drive.google.com/file/d/" + id + "/preview";
+    frame.hidden = false;
+    if(frame.dataset.cur !== src){      // src sama -> JANGAN dimuat ulang
+        frame.src = src;
+        frame.dataset.cur = src;
+    }
+}
+
+function mvPlayNative(wrap, lang, url, keepTime, shouldPlay){
+    const video = document.getElementById("mainVideo");
+    const frame = document.getElementById("mainVideoFrame");
+    const token = ++MV.token;
+    clearTimeout(MV.timer);
+
+    // matikan iframe (dan suaranya) bila sebelumnya tampil
+    if(frame.dataset.cur){ frame.src = "about:blank"; frame.dataset.cur = ""; }
+    frame.hidden = true;
+    video.hidden = false;
+
+    function cleanup(){
+        video.removeEventListener("loadedmetadata", onMeta);
+        video.removeEventListener("error", onErr);
+        clearTimeout(MV.timer);
+    }
+    function onMeta(){
+        if(token !== MV.token) return;
+        cleanup();
+        MV.pendingTime = 0;
+        try{
+            if(keepTime > 0 && isFinite(video.duration)){
+                video.currentTime = Math.min(keepTime, Math.max(video.duration - 0.1, 0));
+            }
+        }catch(e){}
+        if(shouldPlay){ video.play().catch(()=>{}); }
+    }
+    function onErr(){
+        if(token !== MV.token) return;
+        cleanup();
+        console.warn("Video gagal dimuat:", url);
+        const list = mvCandidates(wrap, lang);
+        MV.tryIdx[lang]++;
+        if(MV.tryIdx[lang] < list.length){
+            mvPlayNative(wrap, lang, list[MV.tryIdx[lang]], keepTime, shouldPlay);
+        }else{
+            MV.failed[lang] = true;
+            mvShowFrame(wrap, lang);    // cadangan: iframe Drive
+        }
+    }
+
+    video.addEventListener("loadedmetadata", onMeta);
+    video.addEventListener("error", onErr);
+    MV.timer = setTimeout(function(){ if(token===MV.token && video.readyState===0) onErr(); }, 15000);
+
+    video.src = url;
+    video.load();
+}
+
+function updateMainVideo(lang){
+    const wrap  = document.getElementById("videoWrapper");
+    const video = document.getElementById("mainVideo");
+    if(!wrap || !video) return;
+    if(MV.lang === lang) return;        // bahasa sama -> tidak ada reload, tidak berkedip
+
+    // 1) tangkap posisi & status play SEBELUM sumber diganti
+    let keepTime = 0, shouldPlay = true;            // default: pemuatan pertama = autoplay
+    if(MV.lang !== null && !video.hidden){          // mode native
+        keepTime   = (video.readyState > 0) ? video.currentTime : MV.pendingTime;
+        shouldPlay = !video.paused && !video.ended; // sedang paused -> tetap paused
+    }
+    MV.pendingTime = keepTime;
+    MV.lang = lang;
+
+    // 2) tampilkan sumber untuk bahasa baru
+    const list = mvCandidates(wrap, lang);
+    if(list.length && !MV.failed[lang]){
+        const url = list[Math.min(MV.tryIdx[lang], list.length-1)];
+        mvPlayNative(wrap, lang, url, keepTime, shouldPlay);
+    }else{
+        mvShowFrame(wrap, lang);
+    }
 }
 
 /* OPTIMIZED TRACKING FUNCTION */
@@ -186,12 +284,16 @@ color:#333;padding:10px;border-radius:14px;z-index:999;
     background:#000;
 }
 
-.video-wrapper1 iframe{
+.video-wrapper1 iframe,
+.video-wrapper1 video{
     width:100%;
     height:100%;
     border:none;
     display:block;
+    background:#000;
 }
+.video-wrapper1 video{ object-fit:contain; }
+.video-wrapper1 [hidden]{ display:none !important; }
 
 .video-title1{
     width:100%;
@@ -302,13 +404,21 @@ data-id="📍 LIHAT LOKASI VIA GOOGLE MAPS" data-en="📍 VIEW LOCATION VIA GOOG
     🔥 <strong>Magnet Investor Baru:</strong> TURYAPADA TOWER & <br>AIR TERJUN
 </h2>
 
-<!-- VIDEO UTAMA MENGGUNAKAN IFRAME PREVIEW DRIVE (DIJAMIN PLAY & BERGANTI SAAT TOGGLE BAHASA) -->
-<div class="video-wrapper1">
-    <iframe id="mainVideoFrame" 
-            src="https://drive.google.com/file/d/1dXN0fc60i9BAMdh9n5yS9QtGTmc5D85e/preview" 
-            data-id="1w7O-rcaGcdYpxaKxWdxHK5HsJkjDb7Mt" 
-            data-en="1dXN0fc60i9BAMdh9n5yS9QtGTmc5D85e" 
-            allow="autoplay; fullscreen" 
+<!-- VIDEO UTAMA: <video> native (posisi & status play terjaga saat toggle ID/EN), cadangan iframe Google Drive -->
+<div class="video-wrapper1" id="videoWrapper"
+     data-mp4-id="/videos/Menara-Turyapada.mp4"
+     data-mp4-en="/videos/Turyapada_Tower_EN_dubbed_web.mp4">
+
+    <!-- PEMUTAR UTAMA: <video> native (file mp4 di project Vercel: /videos/...) -> posisi & status play terjaga saat toggle ID/EN.
+         Tanpa atribut autoplay: play dikontrol JS supaya status paused ikut terjaga. -->
+    <video id="mainVideo" muted controls loop playsinline webkit-playsinline preload="auto"></video>
+
+    <!-- CADANGAN: iframe Drive (dipakai otomatis hanya jika mp4 gagal dimuat).
+         src sengaja tidak diisi di HTML agar tidak ada pemuatan ganda / berkedip saat halaman dibuka. -->
+    <iframe id="mainVideoFrame" hidden
+            data-id="1w7O-rcaGcdYpxaKxWdxHK5HsJkjDb7Mt"
+            data-en="1dXN0fc60i9BAMdh9n5yS9QtGTmc5D85e"
+            allow="autoplay; fullscreen"
             allowfullscreen>
     </iframe>
 </div>
